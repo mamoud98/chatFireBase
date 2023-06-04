@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  getDatabase,
-  ref,
-  push,
-  set,
-  onChildAdded,
-  onChildChanged,
-  onValue,
-  child,
-  get,
-} from "firebase/database";
+import { ref, set, onChildAdded, child, get } from "firebase/database";
 import { useNavigate } from "react-router-dom";
 
 function Empoley({ reference, db }) {
@@ -19,10 +9,12 @@ function Empoley({ reference, db }) {
 
   useEffect(() => {
     onChildAdded(reference, (data) => {
-      setChildAdded(data.val());
-      setNewChat(true);
+      if (data.exists() && !data.val().data?.employees) {
+        setChildAdded(data.val());
+        setNewChat(true);
+      }
     });
-  }, []);
+  }, [reference]);
 
   const addEmployees = async (name) => {
     const userChannelsSnapshot = await get(
