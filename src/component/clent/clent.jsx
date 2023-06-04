@@ -1,56 +1,44 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./chat.scss";
 import { useParams } from "react-router-dom";
-import {
-  child,
-  get,
-  onChildAdded,
-  push,
-  ref,
-  set,
-} from "firebase/database";
+import { getDatabase, onChildAdded, push, ref, set } from "firebase/database";
 
-function Chat({ reference, db }) {
+function Clent() {
+  const db = getDatabase();
   const [massges, setMassges] = useState([]);
   const textInput = useRef();
-  const { name } = useParams();
+  const { compantID, chanleID } = useParams();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const referencenew = ref(db, `ChannelsBase/${name}/massages`);
+    const referencenew = ref(
+      db,
+      `Company/${compantID}/chats/${chanleID}/massages`
+    );
 
     const newPostRef = push(referencenew);
     set(newPostRef, {
-      massages: textInput.current.value,
+      massage: textInput.current.value,
     });
     textInput.current.value = "";
   };
 
   const handAnyChanged = useCallback(() => {
-    const referencenew = ref(db, `ChannelsBase/${name}/massages`);
+    const referencenew = ref(
+      db,
+      `Company/${compantID}/chats/${chanleID}/massages`
+    );
+
     onChildAdded(referencenew, (data) => {
       setMassges((prev) => [...prev, data.val()]);
     });
-  }, [db, name]);
+  }, [db, compantID, chanleID]);
 
   useEffect(() => {
     handAnyChanged();
   }, [handAnyChanged]);
-  const addMoreEmpoley = async (names) => {
-    const referencenew = ref(db, `ChannelsBase/${name}/data`);
-    const userChannelsSnapshot = await get(child(reference, `/${name}/data`));
-    set(referencenew, {
-      ...userChannelsSnapshot.val(),
-      employees: [...userChannelsSnapshot.val().employees, names],
-    });
-  };
   return (
     <div className="container">
-      <div>
-        <button onClick={() => addMoreEmpoley("Empoley2")}>
-          add more empoley
-        </button>
-      </div>
       <h1>Swanky Chatbox UI With React</h1>
       <div className="chatbox" ng-controller="MessageCtrl as chatMessage">
         <div className="chatbox__messages" ng-repeat="message in messages">
@@ -61,9 +49,9 @@ function Chat({ reference, db }) {
                   key={i}
                   className="chatbox__messages__user-message--ind-message"
                 >
-                  <p className="name">{mas.massages}</p>
+                  <p className="name">{compantID}</p>
                   <br />
-                  <p className="message">{mas.massages}</p>
+                  <p className="message">{mas.massage}</p>
                 </div>
               ))}
           </div>
@@ -76,4 +64,4 @@ function Chat({ reference, db }) {
   );
 }
 
-export default Chat;
+export default Clent;
