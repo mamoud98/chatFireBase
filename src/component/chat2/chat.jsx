@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./chat.scss";
 import { useParams } from "react-router-dom";
 import {
   child,
   get,
   onChildAdded,
-  onChildChanged,
   push,
   ref,
   set,
@@ -13,16 +12,8 @@ import {
 
 function Chat({ reference, db }) {
   const [massges, setMassges] = useState([]);
-  const [childChanged, setChildChanged] = useState("");
   const textInput = useRef();
   const { name } = useParams();
-  const referencenew = ref(db, `ChannelsBase/${name}`);
-
-  const getChatData = async () => {
-    onChildChanged(referencenew, (data) => {
-      setChildChanged(data);
-    });
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -35,17 +26,16 @@ function Chat({ reference, db }) {
     textInput.current.value = "";
   };
 
-  const handAnyChanged = () => {
+  const handAnyChanged = useCallback(() => {
     const referencenew = ref(db, `ChannelsBase/${name}/massages`);
     onChildAdded(referencenew, (data) => {
       setMassges((prev) => [...prev, data.val()]);
     });
-  };
+  }, [db, name]);
 
   useEffect(() => {
-    getChatData();
     handAnyChanged();
-  }, []);
+  }, [handAnyChanged]);
   const addMoreEmpoley = async (names) => {
     const referencenew = ref(db, `ChannelsBase/${name}/data`);
     const userChannelsSnapshot = await get(child(reference, `/${name}/data`));
